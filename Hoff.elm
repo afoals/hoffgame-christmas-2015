@@ -30,6 +30,7 @@ type alias Bg =
 type alias GameState =
     { mario : Model
     , burger : Burger
+    , zombie : Model
     , score : Int }
 
 type Direction = Left | Right
@@ -73,6 +74,7 @@ gameState : GameState
 gameState =
     { mario = mario
     , burger = burger
+    , zombie = zombie
     , score = 0 }
 
 -- UPDATE
@@ -132,10 +134,17 @@ handleAnyCollisions gameState =
   case isCollision gameState of
     Just BurgerCollision ->
         let burger = gameState.burger
+            zombie = gameState.zombie
         in
             { gameState |
                 burger = { burger | x = burger.x - 100 },
                 score = gameState.score + 1 }
+    Just ZombieCollision ->
+        let zombie = gameState.zombie
+        in
+            { gameState |
+                zombie = { zombie | x = zombie.x - 500 },
+                score = gameState.score - 1 }
     _ -> gameState
 
 
@@ -145,11 +154,17 @@ isCollision gameState =
       marioY = gameState.mario.y
       burgerX = gameState.burger.x
       burgerY = gameState.burger.y
+      zombieX = gameState.zombie.x
+      zombieY = gameState.zombie.y
+      collide x1 y1 x2 y2 =
+        x1 >= x2 - 20
+        && x1 <= x2 + 20
+        && y1 <= y2 + 20
   in
-    if marioX >= burgerX - 20
-        && marioX <= burgerX + 20
-        && marioY <= burgerY + 20 then
+    if collide marioX marioY burgerX burgerY then
       Just BurgerCollision
+    else if collide marioX marioY zombieX zombieY then
+      Just ZombieCollision
     else
       Nothing
 
@@ -163,6 +178,8 @@ view (w',h') gameState =
       mario = gameState.mario
 
       burger = gameState.burger
+
+      zombie = gameState.zombie
 
       verb =
         if  mario.y > 0 then
