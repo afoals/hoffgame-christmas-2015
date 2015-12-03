@@ -57,6 +57,15 @@ beach2 =
   , dir = Left
   }
 
+beach3 : Beach
+beach3 =
+  { x = 0
+  , y = 0
+  , vx = 0
+  , dir = Left
+  }
+
+
 zombie : Model
 zombie =
     { x = 500
@@ -75,6 +84,7 @@ gameState =
     , beach = beach
     , status = (Alive 5)
     , beach2 = beach2
+    , beach3 = beach3
     }
 
 
@@ -100,9 +110,13 @@ update (dt, keys, dimensions) gameState =
             gameState.beach2
             |> scrollBg keys
             |> beachPhysics dt dimensions
+        beach3 =
+            gameState.beach3
+            |> scrollBg keys
+            |> beachPhysics dt dimensions
     in
 
-      { gameState | mario = mario, zombie = zombie, beach = beach, beach2 = beach2 }
+      { gameState | mario = mario, zombie = zombie, beach = beach, beach2 = beach2, beach3 = beach3 }
           |> handleAnyCollisions
           |> Debug.watch "gameState"
 
@@ -151,7 +165,10 @@ beachPhysics dt dimensions beach =
     let w = toFloat dimensions.width
         newX = beach.x - dt * beach.vx
     in { beach |
-        x = if (newX <= 1 - w) then 0 else newX
+        x =
+          if (beach.dir == Right) then
+            if (newX <= 1 - w) then 0 else newX
+          else if (newX >= w) then 0 else newX
     }
 
 
@@ -224,6 +241,8 @@ view (w',h') gameState =
 
       beach2 = gameState.beach2
 
+      beach3 = gameState.beach3
+
       verb =
         if  mario.y > 0 then
           "jump"
@@ -266,6 +285,10 @@ view (w',h') gameState =
         image w h "imgs/background/beach.png"
       beach2Position = (beach2.x + w, beach2.y)
 
+      beach3Image w h =
+        image w h "imgs/background/beach.png"
+      beach3Position = (beach3.x - w, beach3.y)
+
       zombieImage = image 150 150 "imgs/zombie-left.png"
       zombiePosition = (zombie.x, zombie.y + groundY + 50)
   in
@@ -279,6 +302,9 @@ view (w',h') gameState =
           , beach2Image (round w) (round h)
               |> toForm
               |> move beach2Position
+          , beach3Image (round w) (round h)
+              |> toForm
+              |> move beach3Position
           , marioImage
               |> toForm
               |> Debug.trace "mario"
