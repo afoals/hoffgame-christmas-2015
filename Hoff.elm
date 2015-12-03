@@ -126,8 +126,8 @@ gravity dt mario =
     }
 
 
-physics : Float -> Model -> Dimensions -> Model
-physics dt mario dimensions =
+physics : Float -> WindowDimensions -> Model -> Model
+physics dt dimensions mario =
     { mario |
         y = max 0 (mario.y + dt * mario.vy)
     }
@@ -146,8 +146,8 @@ walk keys mario =
             mario.dir
     }
 
-beachPhysics : Float -> Beach -> Dimensions -> Beach
-beachPhysics dt beach dimensions =
+beachPhysics : Float -> WindowDimensions -> Beach -> Beach
+beachPhysics dt dimensions beach =
     { beach |
         x = beach.x - dt * beach.vx
     }
