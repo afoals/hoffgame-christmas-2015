@@ -99,7 +99,12 @@ view (w',h') mario =
           Left -> "left"
           Right -> "right"
 
-      src = "imgs/mario/"++ verb ++ "/" ++ dir ++ ".gif"
+      hoff =
+        case verb of
+          "jump" -> "hoff-explode"
+          _      -> "hoff"
+
+      src = "imgs/" ++ hoff ++ ".png"
 
       marioImage = image 35 35 src
 
