@@ -26,7 +26,12 @@ type alias Beach =
     , dir : Direction
     }
 
-type Status = Dead | Alive Int
+type alias Hurting =
+    { livesLeft : Int
+    , timeLeft : Int
+    }
+
+type Status = Dead | Alive Int | Hurt Hurting 
 
 type alias GameState =
     { mario : Model
@@ -40,3 +45,4 @@ type alias GameState =
     }
 
 type Direction = Left | Right
+

@@ -8,6 +8,7 @@ import Window
 import Random
 import Zombie
 import Types exposing (..)
+import Lives
 
 
 -- MODEL
@@ -99,6 +100,9 @@ update (dt, keys, dimensions) gameState =
             |> walk keys
             |> physics dt dimensions
 
+        burger =
+            gameState.burger
+            |> moveBurger keys dt
         zombie =
             gameState.zombie
             |> moveX keys
@@ -114,9 +118,11 @@ update (dt, keys, dimensions) gameState =
             gameState.beach3
             |> scrollBg keys
             |> beachPhysics dt dimensions
-    in
+        newStatus =
+            Lives.update gameState.status
 
-      { gameState | mario = mario, zombie = zombie, beach = beach, beach2 = beach2, beach3 = beach3 }
+    in
+      { gameState | mario = mario, zombie = zombie, beach = beach, beach2 = beach2, beach3 = beach3, status = newStatus, burger = burger }
           |> handleAnyCollisions
           |> Debug.watch "gameState"
 
@@ -171,6 +177,18 @@ beachPhysics dt dimensions beach =
           else if (newX >= w) then 0 else newX
     }
 
+moveBurger : Keys -> Float -> Burger -> Burger
+moveBurger keys dt burger =
+  let vx = toFloat keys.x * 3
+      dir =
+        if keys.x < 0 then
+          Left
+        else
+          Right
+      newX = burger.x - dt * vx
+  in
+    { burger | x = newX }
+
 
 scrollBg : Keys -> Beach -> Beach
 scrollBg keys beach =
@@ -199,8 +217,8 @@ handleAnyCollisions gameState =
         let zombie = gameState.zombie
         in
             { gameState |
-                zombie = { zombie | x = zombie.x + 1000 },
-                score = gameState.score - 1 }
+                zombie = { zombie | x = zombie.x + 1000 }
+            ,   status = (Lives.loose gameState.status) }
     Nothing -> gameState
 
 
@@ -289,8 +307,15 @@ view (w',h') gameState =
         image w h "imgs/background/beach.png"
       beach3Position = (beach3.x - w, beach3.y)
 
-      zombieImage = image 150 150 "imgs/zombie-left.png"
+      zombieImage = image 150 150 "imgs/zombie.gif"
       zombiePosition = (zombie.x, zombie.y + groundY + 50)
+
+      lives =
+        case gameState.status of
+          Alive l -> l
+          Hurt h  -> h.livesLeft
+          Dead    -> 0
+      livesImage = image 35 35 "imgs/hoff-right.gif"
   in
       collage w' h'
           [ skyImage (round w) (round h)
@@ -317,13 +342,20 @@ view (w',h') gameState =
               |> toForm
               |> Debug.trace "zombie"
               |> move zombiePosition
-          , burgerImage
+          , livesImage
               |> toForm
-              |> move (470, 300)
-          , gameState.score
+              |> move (474, 300)
+          , lives
               |> show
               |> toForm
               |> move (500, 300)
+          , burgerImage
+              |> toForm
+              |> move (470, 260)
+          , gameState.score
+              |> show
+              |> toForm
+              |> move (500, 260)
           ]
 
 
