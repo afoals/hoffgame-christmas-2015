@@ -63,7 +63,6 @@ gameState =
     , zombie = zombie
     , score = 0
     , beach = beach
-    , beach2 = beach2
     }
 
 
