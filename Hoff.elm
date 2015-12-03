@@ -62,6 +62,7 @@ gameState =
     , zombie = zombie
     , score = 0
     , beach = beach
+    , status = (Alive 5)
     }
 
 
