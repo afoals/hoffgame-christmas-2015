@@ -152,8 +152,10 @@ walk keys mario =
 
 beachPhysics : Float -> WindowDimensions -> Beach -> Beach
 beachPhysics dt dimensions beach =
-    { beach |
-        x = beach.x - dt * beach.vx
+    let w = toFloat dimensions.width
+        newX = beach.x - dt * beach.vx
+    in { beach |
+        x = if (newX <= 1 - w) then 0 else newX
     }
 
 
