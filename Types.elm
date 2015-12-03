@@ -40,6 +40,7 @@ type alias GameState =
     , score : Int
     , beach : Beach
     , beach2 : Beach
+    , beach3 : Beach
     , status : Status
     }
 
