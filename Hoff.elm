@@ -69,9 +69,18 @@ beach3 =
 
 zombie : Model
 zombie =
-    { x = 500
+    { x = 1200
     , y = 0
-    , vx = 0
+    , vx = 10
+    , vy = 0
+    , dir = Left
+    }
+
+zombie2 : Model
+zombie2 =
+    { x = 1000
+    , y = 0
+    , vx = 6
     , vy = 0
     , dir = Left
     }
@@ -81,6 +90,7 @@ gameState =
     { mario = mario
     , burger = burger
     , zombie = zombie
+    , zombie2 = zombie2
     , score = 0
     , beach = beach
     , status = (Alive 5)
@@ -111,7 +121,10 @@ update (dt, keys, dimensions) gameState =
             |> moveBurger keys dt
         zombie =
             gameState.zombie
-            |> moveX keys
+            |> moveX keys dimensions
+        zombie2 =
+            gameState.zombie2
+            |> moveX keys dimensions
         beach =
             gameState.beach
             |> scrollBg keys
@@ -128,14 +141,15 @@ update (dt, keys, dimensions) gameState =
             Lives.update gameState.status
 
     in
-      { gameState | mario = mario, zombie = zombie, beach = beach, beach2 = beach2, beach3 = beach3, status = newStatus, burger = burger }
+      { gameState | mario = mario, zombie = zombie, beach = beach, beach2 = beach2, beach3 = beach3, status = newStatus, burger = burger, zombie2 = zombie2 }
           |> handleAnyCollisions
           |> Debug.watch "gameState"
 
 
-moveX keys zombie =
+moveX keys dimensions zombie =
     let vx = toFloat keys.x * 6
-        new = if (zombie.x <= -400.0) then 400 else zombie.x - vx - 10
+        w = toFloat dimensions.width
+        new = if (zombie.x <= -w) then w else zombie.x - vx - 10 * (10 / zombie.vx)
     in { zombie | x = new }
 
 jump : Keys -> Model -> Model
@@ -270,6 +284,8 @@ view (w',h') gameState =
 
       zombie = gameState.zombie
 
+      zombie2 = gameState.zombie2
+
       beach = gameState.beach
 
       beach2 = gameState.beach2
@@ -326,6 +342,9 @@ view (w',h') gameState =
       zombieImage = image 150 150 "imgs/zombie-default.gif"
       zombiePosition = (zombie.x, zombie.y + groundY + 50)
 
+      zombie2Image = image 150 150 "imgs/zombie-moonwalk.gif"
+      zombie2Position = (zombie2.x, zombie2.y + groundY + 50)
+
       lives =
         case gameState.status of
           Alive l -> l
@@ -359,6 +378,10 @@ view (w',h') gameState =
               |> toForm
               |> Debug.trace "zombie"
               |> move zombiePosition
+          , zombie2Image
+              |> toForm
+              |> Debug.trace "zombie2"
+              |> move zombie2Position
           , livesImage
               |> toForm
               |> move (474, 300)
