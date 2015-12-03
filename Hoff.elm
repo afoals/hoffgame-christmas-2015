@@ -90,6 +90,9 @@ update (dt, keys, dimensions) gameState =
             |> walk keys
             |> physics dt dimensions
 
+        burger =
+            gameState.burger
+            |> moveBurger keys dt
         zombie =
             gameState.zombie
             |> moveX keys
@@ -105,8 +108,7 @@ update (dt, keys, dimensions) gameState =
             Lives.update gameState.status
 
     in
-
-      { gameState | mario = mario, zombie = zombie, beach = beach, beach2 = beach2, status = newStatus}
+      { gameState | mario = mario, zombie = zombie, beach = beach, beach2 = beach2, status = newStatus, burger = burger }
           |> handleAnyCollisions
           |> Debug.watch "gameState"
 
@@ -157,6 +159,18 @@ beachPhysics dt dimensions beach =
     in { beach |
         x = if (newX <= 1 - w) then 0 else newX
     }
+
+moveBurger : Keys -> Float -> Burger -> Burger
+moveBurger keys dt burger =
+  let vx = toFloat keys.x * 3
+      dir =
+        if keys.x < 0 then
+          Left
+        else
+          Right
+      newX = burger.x - dt * vx
+  in
+    { burger | x = newX }
 
 
 scrollBg : Keys -> Beach -> Beach
