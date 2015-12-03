@@ -39,3 +39,4 @@ type alias GameState =
     }
 
 type Direction = Left | Right
+
