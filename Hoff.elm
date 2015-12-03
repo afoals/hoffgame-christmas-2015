@@ -112,10 +112,10 @@ view (w',h') mario =
 
       hoff =
         case verb of
-          "jump" -> "hoff-explode"
+          "jump" -> "hoff-jump"
           _      -> "hoff"
 
-      src = "imgs/" ++ hoff ++ ".png"
+      src = "imgs/" ++ hoff ++ "-" ++ dir ++ ".png"
 
       marioImage = image 65 65 src
 
