@@ -323,7 +323,7 @@ view (w',h') gameState =
         image w h "imgs/background/beach.png"
       beach3Position = (beach3.x - w, beach3.y)
 
-      zombieImage = image 150 150 "imgs/zombie.gif"
+      zombieImage = image 150 150 "imgs/zombie-default.gif"
       zombiePosition = (zombie.x, zombie.y + groundY + 50)
 
       lives =
