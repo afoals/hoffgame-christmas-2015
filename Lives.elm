@@ -1,12 +1,14 @@
 module Lives where
 import Types exposing (..)
 
-loose : GameState -> GameState
+loose : Status -> Status
 loose gs =
-    case gs.status of
+    case gs of
         Alive livesLeft ->
-            let newStatus = if livesLeft > 1 then Alive (livesLeft - 1) else Dead
-                in { gs | status = newStatus }
+            if livesLeft > 1 then 
+                let newLives = livesLeft - 1
+                    in Hurt { livesLeft = newLives, timeLeft = 60 }
+            else Dead
         _ -> gs
 
 update: Status -> Status

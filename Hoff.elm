@@ -200,8 +200,8 @@ handleAnyCollisions gameState =
         let zombie = gameState.zombie
         in
             { gameState |
-                zombie = { zombie | x = zombie.x + 1000 },
-                score = gameState.score - 1 }
+                zombie = { zombie | x = zombie.x + 1000 }
+            ,   status = (Lives.loose gameState.status) }
     Nothing -> gameState
 
 
