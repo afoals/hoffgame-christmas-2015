@@ -6,6 +6,7 @@ import Keyboard
 import Time exposing (..)
 import Window
 import Random
+import Zombie
 
 
 -- MODEL
