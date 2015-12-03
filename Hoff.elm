@@ -17,6 +17,8 @@ type alias Keys = { x:Int, y:Int }
 
 type Collision = BurgerCollision | ZombieCollision
 
+type alias WindowDimensions = { height: Int, width: Int }
+
 
 mario : Model
 mario =
@@ -78,14 +80,14 @@ gameState =
 
 -- UPDATE
 
-update : (Float, Keys) -> GameState -> GameState
-update (dt, keys) gameState =
+update : (Float, Keys, WindowDimensions) -> GameState -> GameState
+update (dt, keys, dimensions) gameState =
     let mario =
             gameState.mario
-                |> gravity dt
-                |> jump keys
-                |> walk keys
-                |> physics dt
+            |> gravity dt
+            |> jump keys
+            |> walk keys
+            |> physics dt dimensions
 
         zombie =
             gameState.zombie
@@ -93,15 +95,14 @@ update (dt, keys) gameState =
         beach =
             gameState.beach
             |> scrollBg keys
-            |> beachPhysics dt
+            |> beachPhysics dt dimensions
         beach2 =
             gameState.beach2
             |> scrollBg keys
-            |> beachPhysics dt
+            |> beachPhysics dt dimensions
     in
 
       { gameState | mario = mario, zombie = zombie, beach = beach, beach2 = beach2 }
-
           |> handleAnyCollisions
           |> Debug.watch "gameState"
 
@@ -125,8 +126,8 @@ gravity dt mario =
     }
 
 
-physics : Float -> Model -> Model
-physics dt mario =
+physics : Float -> WindowDimensions -> Model -> Model
+physics dt dimensions mario =
     { mario |
         y = max 0 (mario.y + dt * mario.vy)
     }
@@ -145,8 +146,8 @@ walk keys mario =
             mario.dir
     }
 
-beachPhysics : Float -> Beach -> Beach
-beachPhysics dt beach =
+beachPhysics : Float -> WindowDimensions -> Beach -> Beach
+beachPhysics dt dimensions beach =
     { beach |
         x = beach.x - dt * beach.vx
     }
@@ -302,10 +303,11 @@ main =
   Signal.map2 view Window.dimensions (Signal.foldp update gameState input)
 
 
-input : Signal (Float, Keys)
+input : Signal (Float, Keys, WindowDimensions)
 input =
   let delta = Signal.map (\t -> t/10) (fps 30)
       deltaArrows =
           Signal.map2 (,) delta (Signal.map (Debug.watch "arrows") Keyboard.arrows)
   in
       Signal.sampleOn delta deltaArrows
+      |> Signal.map2 (\(w,h) (f, ks) -> (f, ks, { height = h, width = w })) Window.dimensions
