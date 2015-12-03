@@ -22,7 +22,13 @@ type alias Burger =
     , y : Float
     }
 
-type alias Bg =
+type alias Sky =
+    { x : Float
+    , y : Float
+    }
+
+
+type alias Beach =
     { x : Float
     , y : Float
     }
@@ -55,11 +61,17 @@ burger =
     , y = 0
     }
 
-bg : Bg
-bg =
+sky : Sky
+sky =
     { x = 0
     , y = 0
     }
+
+beach : Beach
+beach =
+  { x = 0
+  , y = 0
+  }
 
 zombie : Model
 zombie =
@@ -96,7 +108,7 @@ update (dt, keys) gameState =
 jump : Keys -> Model -> Model
 jump keys mario =
     if keys.y > 0 && mario.vy == 0
-      then { mario | vy = 6.0 }
+      then { mario | vy = 10.0 }
       else mario
 
 
@@ -118,7 +130,7 @@ physics dt mario =
 walk : Keys -> Model -> Model
 walk keys mario =
     { mario |
-        vx = toFloat keys.x * 2,
+        vx = toFloat keys.x * 3,
         dir =
           if keys.x < 0 then
             Left
@@ -202,27 +214,33 @@ view (w',h') gameState =
 
       src = "imgs/" ++ hoff ++ "-" ++ dir ++ ".gif"
 
-      marioImage = image 65 65 src
+      marioImage = image 150 150 src
 
       groundY = 62 - h/2
 
-      position = (mario.x, mario.y + groundY)
+      position = (mario.x, mario.y + groundY + 50)
 
       burgerImage = image 25 25 "imgs/burger.png"
       burgerPosition = (burger.x, burger.y + groundY)
 
-      bgImage w h =
-        image w h "imgs/background/bg.png"
-      bgPosition = (bg.x, bg.y)
+      skyImage w h =
+        image w h "imgs/background/sky.png"
+      skyPosition = (sky.x, sky.y)
 
-      zombieImage = image 65 65 "imgs/zombie-left.png"
-      zombiePosition = (zombie.x, zombie.y + groundY)
+      beachImage w h =
+        image w h "imgs/background/beach.png"
+      beachPosition = (beach.x, beach.y)
+
+      zombieImage = image 150 150 "imgs/zombie-left.png"
+      zombiePosition = (zombie.x, zombie.y + groundY + 50)
   in
       collage w' h'
-          [ bgImage (round w) (round h)
+          [ skyImage (round w) (round h)
               |> toForm
-              |> move bgPosition
-
+              |> move skyPosition
+          , beachImage (round w) (round h)
+              |> toForm
+              |> move beachPosition
           , marioImage
               |> toForm
               |> Debug.trace "mario"
