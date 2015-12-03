@@ -12,6 +12,7 @@ import Types exposing (..)
 
 -- MODEL
 
+
 type alias Keys = { x:Int, y:Int }
 
 type Collision = BurgerCollision | ZombieCollision
@@ -46,6 +47,14 @@ beach =
   , dir = Left
   }
 
+beach2 : Beach
+beach2 =
+  { x = 0
+  , y = 0
+  , vx = 0
+  , dir = Left
+  }
+
 zombie : Model
 zombie =
     { x = 500
@@ -63,6 +72,7 @@ gameState =
     , score = 0
     , beach = beach
     , status = (Alive 5)
+    , beach2 = beach2
     }
 
 
@@ -84,9 +94,13 @@ update (dt, keys) gameState =
             gameState.beach
             |> scrollBg keys
             |> beachPhysics dt
+        beach2 =
+            gameState.beach2
+            |> scrollBg keys
+            |> beachPhysics dt
     in
 
-      { gameState | mario = mario, zombie = zombie, beach = beach }
+      { gameState | mario = mario, zombie = zombie, beach = beach, beach2 = beach2 }
 
           |> handleAnyCollisions
           |> Debug.watch "gameState"
@@ -134,7 +148,7 @@ walk keys mario =
 beachPhysics : Float -> Beach -> Beach
 beachPhysics dt beach =
     { beach |
-        x =  beach.x - dt * beach.vx
+        x = beach.x - dt * beach.vx
     }
 
 
@@ -205,6 +219,8 @@ view (w',h') gameState =
 
       beach = gameState.beach
 
+      beach2 = gameState.beach2
+
       verb =
         if  mario.y > 0 then
           "jump"
@@ -243,6 +259,10 @@ view (w',h') gameState =
         image w h "imgs/background/beach.png"
       beachPosition = (beach.x, beach.y)
 
+      beach2Image w h =
+        image w h "imgs/background/beach.png"
+      beach2Position = (beach2.x + w, beach2.y)
+
       zombieImage = image 150 150 "imgs/zombie-left.png"
       zombiePosition = (zombie.x, zombie.y + groundY + 50)
   in
@@ -253,6 +273,9 @@ view (w',h') gameState =
           , beachImage (round w) (round h)
               |> toForm
               |> move beachPosition
+          , beach2Image (round w) (round h)
+              |> toForm
+              |> move beach2Position
           , marioImage
               |> toForm
               |> Debug.trace "mario"
