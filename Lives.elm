@@ -7,7 +7,7 @@ loose gs =
         Alive livesLeft ->
             if livesLeft > 1 then 
                 let newLives = livesLeft - 1
-                    in Hurt { livesLeft = newLives, timeLeft = 60 }
+                    in Hurt { livesLeft = newLives, timeLeft = 80 }
             else Dead
         _ -> gs
 

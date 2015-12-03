@@ -207,26 +207,35 @@ handleAnyCollisions gameState =
 
 isCollision : GameState -> Maybe Collision
 isCollision gameState =
-  let marioX = gameState.mario.x
-      marioY = gameState.mario.y
-      burgerX = gameState.burger.x
-      burgerY = gameState.burger.y
-      zombieX = gameState.zombie.x
-      zombieY = gameState.zombie.y
-      collide x1 y1 x2 y2 =
-        x1 >= x2 - 20
-        && x1 <= x2 + 20
-        && y1 <= y2 + 20
-  in
-    if collide marioX marioY burgerX burgerY then
-      Just BurgerCollision
-    else if collide marioX marioY zombieX zombieY then
-      Just ZombieCollision
-    else
-      Nothing
+  case gameState.status of
+    Dead -> Nothing
+    Hurt _ -> Nothing
+    Alive _ ->
+      let marioX = gameState.mario.x
+          marioY = gameState.mario.y
+          burgerX = gameState.burger.x
+          burgerY = gameState.burger.y
+          zombieX = gameState.zombie.x
+          zombieY = gameState.zombie.y
+          collide x1 y1 x2 y2 =
+            x1 >= x2 - 20
+              && x1 <= x2 + 20
+              && y1 <= y2 + 20
+      in
+          if collide marioX marioY burgerX burgerY then
+            Just BurgerCollision
+          else if collide marioX marioY zombieX zombieY then
+            Just ZombieCollision
+          else
+            Nothing
 
 
 -- VIEW
+fadeIfHurt status element =
+  case status of
+    Hurt _ -> opacity 0.3 element
+    _ -> element
+
 
 view : (Int, Int) -> GameState -> Element
 view (w',h') gameState =
@@ -305,6 +314,7 @@ view (w',h') gameState =
               |> toForm
               |> move beach2Position
           , marioImage
+              |> fadeIfHurt gameState.status
               |> toForm
               |> Debug.trace "mario"
               |> move position
