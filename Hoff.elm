@@ -17,6 +17,11 @@ type alias Model =
     , dir : Direction
     }
 
+type alias Burger =
+    { x : Float
+    , y : Float
+    }
+
 type Direction = Left | Right
 
 type alias Keys = { x:Int, y:Int }
@@ -29,6 +34,12 @@ mario =
     , vx = 0
     , vy = 0
     , dir = Right
+    }
+
+burger : Burger
+burger =
+    { x = 200
+    , y = 0
     }
 
 
@@ -106,11 +117,14 @@ view (w',h') mario =
 
       src = "imgs/" ++ hoff ++ ".png"
 
-      marioImage = image 35 35 src
+      marioImage = image 65 65 src
 
       groundY = 62 - h/2
 
       position = (mario.x, mario.y + groundY)
+
+      burgerImage = image 25 25 "imgs/burger.png"
+      burgerPosition = (burger.x, burger.y + groundY)
   in
       collage w' h'
           [ rect w h
@@ -122,6 +136,10 @@ view (w',h') mario =
               |> toForm
               |> Debug.trace "mario"
               |> move position
+          , burgerImage
+              |> toForm
+              |> Debug.trace "burger"
+              |> move burgerPosition
           ]
 
 
