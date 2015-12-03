@@ -22,6 +22,11 @@ type alias Burger =
     , y : Float
     }
 
+type alias Bg =
+    { x : Float
+    , y : Float
+    }
+
 type Direction = Left | Right
 
 type alias Keys = { x:Int, y:Int }
@@ -42,6 +47,20 @@ burger =
     , y = 0
     }
 
+bg : Bg
+bg =
+    { x = 0
+    , y = 0
+    }
+
+zombie : Model
+zombie =
+    { x = 500
+    , y = 0
+    , vx = 0
+    , vy = 0
+    , dir = Left
+    }
 
 -- UPDATE
 
@@ -80,7 +99,7 @@ physics dt mario =
 walk : Keys -> Model -> Model
 walk keys mario =
     { mario |
-        vx = toFloat keys.x,
+        vx = toFloat keys.x * 2,
         dir =
           if keys.x < 0 then
             Left
@@ -126,13 +145,19 @@ view (w',h') mario =
 
       burgerImage = image 25 25 "imgs/burger.png"
       burgerPosition = (burger.x, burger.y + groundY)
+
+      bgImage w h =
+        image w h "imgs/background/bg.png"
+      bgPosition = (bg.x, bg.y)
+
+      zombieImage = image 65 65 "imgs/zombie-left.png"
+      zombiePosition = (zombie.x, zombie.y + groundY)
   in
       collage w' h'
-          [ rect w h
-              |> filled (rgb 174 238 238)
-          , rect w 50
-              |> filled (rgb 74 167 43)
-              |> move (0, 24 - h/2)
+          [ bgImage (round w) (round h)
+              |> toForm
+              |> move bgPosition
+
           , marioImage
               |> toForm
               |> Debug.trace "mario"
@@ -141,6 +166,10 @@ view (w',h') mario =
               |> toForm
               |> Debug.trace "burger"
               |> move burgerPosition
+          , zombieImage
+              |> toForm
+              |> Debug.trace "zombie"
+              |> move zombiePosition
           ]
 
 
