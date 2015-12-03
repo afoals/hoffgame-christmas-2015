@@ -58,6 +58,15 @@ beach2 =
   , dir = Left
   }
 
+beach3 : Beach
+beach3 =
+  { x = 0
+  , y = 0
+  , vx = 0
+  , dir = Left
+  }
+
+
 zombie : Model
 zombie =
     { x = 500
@@ -76,10 +85,17 @@ gameState =
     , beach = beach
     , status = (Alive 5)
     , beach2 = beach2
+    , beach3 = beach3
     }
 
 
 -- UPDATE
+
+tryUpdate : (Float, Keys, WindowDimensions) -> GameState -> GameState
+tryUpdate (dt, keys, dimensions) gameState =
+  case gameState.status of
+    Dead -> gameState
+    _    -> update (dt, keys, dimensions) gameState
 
 update : (Float, Keys, WindowDimensions) -> GameState -> GameState
 update (dt, keys, dimensions) gameState =
@@ -104,11 +120,15 @@ update (dt, keys, dimensions) gameState =
             gameState.beach2
             |> scrollBg keys
             |> beachPhysics dt dimensions
+        beach3 =
+            gameState.beach3
+            |> scrollBg keys
+            |> beachPhysics dt dimensions
         newStatus =
             Lives.update gameState.status
 
     in
-      { gameState | mario = mario, zombie = zombie, beach = beach, beach2 = beach2, status = newStatus, burger = burger }
+      { gameState | mario = mario, zombie = zombie, beach = beach, beach2 = beach2, beach3 = beach3, status = newStatus, burger = burger }
           |> handleAnyCollisions
           |> Debug.watch "gameState"
 
@@ -157,7 +177,10 @@ beachPhysics dt dimensions beach =
     let w = toFloat dimensions.width
         newX = beach.x - dt * beach.vx
     in { beach |
-        x = if (newX <= 1 - w) then 0 else newX
+        x =
+          if (beach.dir == Right) then
+            if (newX <= 1 - w) then 0 else newX
+          else if (newX >= w) then 0 else newX
     }
 
 moveBurger : Keys -> Float -> Burger -> Burger
@@ -251,28 +274,31 @@ view (w',h') gameState =
 
       beach2 = gameState.beach2
 
-      verb =
-        if  mario.y > 0 then
-          "jump"
-        else if mario.vx /= 0 then
-          "walk"
-        else
-          "stand"
+      beach3 = gameState.beach3
 
-      dir =
-        case mario.dir of
-          Left -> "left"
-          Right -> "right"
+      hoffSrc =
+        case gameState.status of
+          Dead  -> "imgs/hoff-explode.png"
+          _     -> let
+                      verb =
+                        if  mario.y > 0 then
+                          "jump"
+                        else if mario.vx /= 0 then
+                          "walk"
+                        else
+                          "stand"
+                      dir =
+                        case mario.dir of
+                          Left -> "left"
+                          Right -> "right"
+                      hoff =
+                        case verb of
+                          "jump" -> "hoff-jump"
+                          "walk" -> "hoff-walk"
+                          _      -> "hoff"
+                   in "imgs/" ++ hoff ++ "-" ++ dir ++ ".gif"
 
-      hoff =
-        case verb of
-          "jump" -> "hoff-jump"
-          "walk" -> "hoff-walk"
-          _      -> "hoff"
-
-      src = "imgs/" ++ hoff ++ "-" ++ dir ++ ".gif"
-
-      marioImage = image 150 150 src
+      marioImage = image 150 150 hoffSrc
 
       groundY = 62 - h/2
 
@@ -293,7 +319,11 @@ view (w',h') gameState =
         image w h "imgs/background/beach.png"
       beach2Position = (beach2.x + w, beach2.y)
 
-      zombieImage = image 150 150 "imgs/zombie-left.png"
+      beach3Image w h =
+        image w h "imgs/background/beach.png"
+      beach3Position = (beach3.x - w, beach3.y)
+
+      zombieImage = image 150 150 "imgs/zombie.gif"
       zombiePosition = (zombie.x, zombie.y + groundY + 50)
 
       lives =
@@ -313,6 +343,9 @@ view (w',h') gameState =
           , beach2Image (round w) (round h)
               |> toForm
               |> move beach2Position
+          , beach3Image (round w) (round h)
+              |> toForm
+              |> move beach3Position
           , marioImage
               |> fadeIfHurt gameState.status
               |> toForm
@@ -347,7 +380,7 @@ view (w',h') gameState =
 
 main : Signal Element
 main =
-  Signal.map2 view Window.dimensions (Signal.foldp update gameState input)
+  Signal.map2 view Window.dimensions (Signal.foldp tryUpdate gameState input)
 
 
 input : Signal (Float, Keys, WindowDimensions)
