@@ -7,46 +7,11 @@ import Time exposing (..)
 import Window
 import Random
 import Zombie
+import Types exposing (..)
 
 
 -- MODEL
 
-type alias Model =
-    { x : Float
-    , y : Float
-    , vx : Float
-    , vy : Float
-    , dir : Direction
-    }
-
-type alias Burger =
-    { x : Float
-    , y : Float
-    }
-
-type alias Sky =
-    { x : Float
-    , y : Float
-    }
-
-
-type alias Beach =
-    { x : Float
-    , y : Float
-    , vx : Float
-    , dir : Direction
-    }
-
-type alias GameState =
-    { mario : Model
-    , burger : Burger
-    , zombie : Model
-    , score : Int
-    , beach : Beach
-    , beach2: Beach
-    }
-
-type Direction = Left | Right
 
 type alias Keys = { x:Int, y:Int }
 
