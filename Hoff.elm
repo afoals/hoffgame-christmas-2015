@@ -2,6 +2,7 @@ import Color exposing (..)
 import Debug
 import Graphics.Collage exposing (..)
 import Graphics.Element exposing (..)
+import Text exposing (..)
 import Keyboard
 import Time exposing (..)
 import Window
@@ -260,6 +261,18 @@ fadeIfHurt status element =
     _ -> element
 
 
+fontStyle c t =
+    let st =
+        { typeface = ["Impact"]
+        , height = Just 28.0
+        , color = c
+        , bold = True
+        , italic = False
+        , line = Nothing 
+        }
+    in style st t
+
+
 view : (Int, Int) -> GameState -> Element
 view (w',h') gameState =
   let (w,h) = (toFloat w', toFloat h')
@@ -363,16 +376,20 @@ view (w',h') gameState =
               |> toForm
               |> move (474, 300)
           , lives
-              |> show
-              |> toForm
-              |> move (500, 300)
+              |> toString  
+              |> fromString
+              |> fontStyle (rgb 0 127 255)
+              |> text
+              |> move (510, 300)
           , burgerImage
               |> toForm
               |> move (470, 260)
           , gameState.score
-              |> show
-              |> toForm
-              |> move (500, 260)
+              |> toString  
+              |> fromString
+              |> fontStyle (rgb 219 219 59)
+              |> text
+              |> move (510, 260)
           ]
 
 
