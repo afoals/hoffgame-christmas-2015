@@ -1,4 +1,4 @@
-module Types where 
+module Types where
 
 type alias Model =
     { x : Float
@@ -26,12 +26,15 @@ type alias Beach =
     , dir : Direction
     }
 
+type Status = Dead | Alive Int
+
 type alias GameState =
     { mario : Model
     , burger : Burger
     , zombie : Model
     , score : Int
     , beach : Beach
+    , status : Status
     }
 
 type Direction = Left | Right

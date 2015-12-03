@@ -7,7 +7,6 @@ import Time exposing (..)
 import Window
 import Random
 import Zombie
-import Gamestate
 import Types exposing (..)
 
 
