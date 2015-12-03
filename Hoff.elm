@@ -97,6 +97,7 @@ gameState =
     , zombie = zombie
     , score = 0
     , beach = beach
+    , beach2 = beach2
     }
 
 
@@ -113,7 +114,7 @@ update (dt, keys) gameState =
 
         zombie =
             gameState.zombie
-            |> moveX
+            |> moveX keys
         beach =
             gameState.beach
             |> scrollBg keys
@@ -126,9 +127,10 @@ update (dt, keys) gameState =
           |> Debug.watch "gameState"
 
 
-moveX ball =
-    let new = if (ball.x <= -400.0) then 400 else ball.x - 3
-    in { ball | x = new }
+moveX keys zombie =
+    let vx = toFloat keys.x * 6
+        new = if (zombie.x <= -400.0) then 400 else zombie.x - vx - 10
+    in { zombie | x = new }
 
 jump : Keys -> Model -> Model
 jump keys mario =
@@ -167,7 +169,7 @@ walk keys mario =
 beachPhysics : Float -> Beach -> Beach
 beachPhysics dt beach =
     { beach |
-        x = beach.x + dt * beach.vx
+        x =  beach.x - dt * beach.vx
     }
 
 
