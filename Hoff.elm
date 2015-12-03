@@ -289,6 +289,9 @@ view (w',h') gameState =
               |> toForm
               |> Debug.trace "zombie"
               |> move zombiePosition
+          , burgerImage
+              |> toForm
+              |> move (470, 300)
           , gameState.score
               |> show
               |> toForm
