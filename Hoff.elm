@@ -108,8 +108,8 @@ update (dt, keys, dimensions) gameState =
 
 
 moveX keys zombie =
-    let vx = toFloat keys.x * 6
-        new = if (zombie.x <= -400.0) then 400 else zombie.x - vx - 10
+    let vx = toFloat keys.x * 10
+        new = if (zombie.x <= -400.0) then 400 else zombie.x - vx - 5
     in { zombie | x = new }
 
 jump : Keys -> Model -> Model
