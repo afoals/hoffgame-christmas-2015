@@ -117,6 +117,7 @@ update (dt, keys) gameState =
         beach =
             gameState.beach
             |> scrollBg keys
+            |> beachPhysics dt
     in
 
       { gameState | mario = mario, zombie = zombie, beach = beach }
@@ -146,7 +147,6 @@ gravity dt mario =
 physics : Float -> Model -> Model
 physics dt mario =
     { mario |
-        x = mario.x + dt * mario.vx,
         y = max 0 (mario.y + dt * mario.vy)
     }
 
@@ -314,7 +314,7 @@ main =
 
 input : Signal (Float, Keys)
 input =
-  let delta = Signal.map (\t -> t/20) (fps 30)
+  let delta = Signal.map (\t -> t/10) (fps 30)
       deltaArrows =
           Signal.map2 (,) delta (Signal.map (Debug.watch "arrows") Keyboard.arrows)
   in
