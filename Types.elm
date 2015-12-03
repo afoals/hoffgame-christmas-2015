@@ -31,12 +31,13 @@ type alias Hurting =
     , timeLeft : Int
     }
 
-type Status = Dead | Alive Int | Hurt Hurting 
+type Status = Dead | Alive Int | Hurt Hurting
 
 type alias GameState =
     { mario : Model
     , burger : Burger
     , zombie : Model
+    , zombie2 : Model
     , score : Int
     , beach : Beach
     , beach2 : Beach
@@ -45,4 +46,3 @@ type alias GameState =
     }
 
 type Direction = Left | Right
-
