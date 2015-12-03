@@ -33,6 +33,8 @@ type alias Sky =
 type alias Beach =
     { x : Float
     , y : Float
+    , vx : Float
+    , dir : Direction
     }
 
 type alias GameState =
@@ -40,6 +42,7 @@ type alias GameState =
     , burger : Burger
     , zombie : Model
     , score : Int
+    , beach : Beach
     }
 
 type Direction = Left | Right
@@ -74,6 +77,8 @@ beach : Beach
 beach =
   { x = 0
   , y = 0
+  , vx = 0
+  , dir = Left
   }
 
 zombie : Model
@@ -91,6 +96,7 @@ gameState =
     , burger = burger
     , zombie = zombie
     , score = 0
+    , beach = beach
     }
 
 
@@ -108,8 +114,13 @@ update (dt, keys) gameState =
         zombie =
             gameState.zombie
             |> moveX
+        beach =
+            gameState.beach
+            |> scrollBg keys
     in
-      { gameState | mario = mario, zombie = zombie }
+
+      { gameState | mario = mario, zombie = zombie, beach = beach }
+
           |> handleAnyCollisions
           |> Debug.watch "gameState"
 
@@ -153,6 +164,25 @@ walk keys mario =
             mario.dir
     }
 
+beachPhysics : Float -> Beach -> Beach
+beachPhysics dt beach =
+    { beach |
+        x = beach.x + dt * beach.vx
+    }
+
+
+scrollBg : Keys -> Beach -> Beach
+scrollBg keys beach =
+    { beach |
+        vx = toFloat keys.x * 3,
+        dir =
+          if keys.x < 0 then
+            Left
+          else if keys.x > 0 then
+            Right
+          else
+            beach.dir
+    }
 
 handleAnyCollisions : GameState -> GameState
 handleAnyCollisions gameState =
@@ -205,6 +235,8 @@ view (w',h') gameState =
       burger = gameState.burger
 
       zombie = gameState.zombie
+
+      beach = gameState.beach
 
       verb =
         if  mario.y > 0 then
