@@ -39,7 +39,6 @@ update (dt, keys) mario =
     mario
         |> gravity dt
         |> jump keys
-        |> walk keys
         |> physics dt
         |> Debug.watch "mario"
 
@@ -61,7 +60,6 @@ gravity dt mario =
 physics : Float -> Model -> Model
 physics dt mario =
     { mario |
-        x = mario.x + dt * mario.vx,
         y = max 0 (mario.y + dt * mario.vy)
     }
 
@@ -89,8 +87,6 @@ view (w',h') mario =
       verb =
         if  mario.y > 0 then
           "jump"
-        else if mario.vx /= 0 then
-          "walk"
         else
           "stand"
 

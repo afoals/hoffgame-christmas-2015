@@ -37,7 +37,9 @@ type alias GameState =
     { mario : Model
     , burger : Burger
     , zombie : Model
-    , score : Int }
+    , score : Int
+    , ball : { x: Float }
+    }
 
 type Direction = Left | Right
 
@@ -87,7 +89,9 @@ gameState =
     { mario = mario
     , burger = burger
     , zombie = zombie
-    , score = 0 }
+    , score = 0
+    , ball = { x = 0 }
+    }
 
 -- UPDATE
 
@@ -99,11 +103,18 @@ update (dt, keys) gameState =
           |> jump keys
           |> walk keys
           |> physics dt
+        ball =
+            gameState.ball
+            |> moveX
     in
-      { gameState | mario = mario}
+      { gameState | mario = mario, ball = ball}
           |> handleAnyCollisions
           |> Debug.watch "gameState"
 
+
+moveX ball =
+    let new = if (ball.x >= 400.0) then -400 else ball.x + 3
+    in { x = new }
 
 jump : Keys -> Model -> Model
 jump keys mario =
@@ -257,6 +268,7 @@ view (w',h') gameState =
               |> show
               |> toForm
               |> move (500, 300)
+          , circle 20.0 |> filled (rgb 20 70 127) |> move (gameState.ball.x, 0)
           ]
 
 
