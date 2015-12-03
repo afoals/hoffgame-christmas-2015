@@ -286,6 +286,13 @@ view (w',h') gameState =
 
       zombieImage = image 150 150 "imgs/zombie-left.png"
       zombiePosition = (zombie.x, zombie.y + groundY + 50)
+
+      lives =
+        case gameState.status of
+          Alive l -> l
+          Hurt h  -> h.livesLeft
+          Dead    -> 0
+      livesImage = image 35 35 "imgs/hoff-right.gif"
   in
       collage w' h'
           [ skyImage (round w) (round h)
@@ -309,13 +316,20 @@ view (w',h') gameState =
               |> toForm
               |> Debug.trace "zombie"
               |> move zombiePosition
-          , burgerImage
+          , livesImage
               |> toForm
-              |> move (470, 300)
-          , gameState.score
+              |> move (474, 300)
+          , lives
               |> show
               |> toForm
               |> move (500, 300)
+          , burgerImage
+              |> toForm
+              |> move (470, 260)
+          , gameState.score
+              |> show
+              |> toForm
+              |> move (500, 260)
           ]
 
 
