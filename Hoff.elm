@@ -34,11 +34,36 @@ mario =
 
 burgers =
   [ { x = 200, y = 0 },
-    { x = 700, y = 0 },
+    { x = 700, y = 20 },
     { x = 950, y = 10 },
     { x = 1100, y = 0 },
-    { x = 1500, y = 0 },
-    { x = 1800, y = 0 } ]
+    { x = 1500, y = 30 },
+    { x = 1800, y = 0 },
+    { x = 2350, y = 15 },
+    { x = 2700, y = 0 },
+    { x = 2950, y = 10 },
+    { x = 2100, y = 0 },
+    { x = 2500, y = 40 },
+    { x = 2800, y = 0 },
+    { x = 2950, y = 10 },
+    { x = 3100, y = 0 },
+    { x = 3500, y = 30 },
+    { x = 3800, y = 0 },
+    { x = 4350, y = 15 },
+    { x = 4700, y = 0 },
+    { x = 4950, y = 10 },
+    { x = 4100, y = 0 },
+    { x = 4500, y = 40 },
+    { x = 4800, y = 0 },
+    { x = 5100, y = 0 },
+    { x = 5500, y = 30 },
+    { x = 5800, y = 0 },
+    { x = 6350, y = 15 },
+    { x = 6700, y = 0 },
+    { x = 6950, y = 10 },
+    { x = 7100, y = 0 },
+    { x = 7500, y = 40 }
+  ]
 
 sky : Sky
 sky =
@@ -258,9 +283,9 @@ isCollision gameState =
           zombieX = gameState.zombie.x
           zombieY = gameState.zombie.y
           collideWithHoff x2 y2 =
-            marioX >= x2 - 20
-              && marioX <= x2 + 20
-              && marioY <= y2 + 20
+            marioX >= x2 - 30
+              && marioX <= x2 + 30
+              && marioY <= y2 + 30
               && marioY >= y2 - 20
           burgers =
             gameState.burgers
