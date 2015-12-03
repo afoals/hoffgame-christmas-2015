@@ -27,9 +27,16 @@ type alias Bg =
     , y : Float
     }
 
+type alias GameState =
+    { mario : Model
+    , burger : Burger
+    , score : Int }
+
 type Direction = Left | Right
 
 type alias Keys = { x:Int, y:Int }
+
+type Collision = BurgerCollision | ZombieCollision
 
 
 mario : Model
@@ -62,16 +69,26 @@ zombie =
     , dir = Left
     }
 
+gameState : GameState
+gameState =
+    { mario = mario
+    , burger = burger
+    , score = 0 }
+
 -- UPDATE
 
-update : (Float, Keys) -> Model -> Model
-update (dt, keys) mario =
-    mario
-        |> gravity dt
-        |> jump keys
-        |> walk keys
-        |> physics dt
-        |> Debug.watch "mario"
+update : (Float, Keys) -> GameState -> GameState
+update (dt, keys) gameState =
+    let mario =
+      gameState.mario
+          |> gravity dt
+          |> jump keys
+          |> walk keys
+          |> physics dt
+    in
+      { gameState | mario = mario}
+          |> handleAnyCollisions
+          |> Debug.watch "gameState"
 
 
 jump : Keys -> Model -> Model
@@ -110,11 +127,42 @@ walk keys mario =
     }
 
 
+handleAnyCollisions : GameState -> GameState
+handleAnyCollisions gameState =
+  case isCollision gameState of
+    Just BurgerCollision ->
+        let burger = gameState.burger
+        in
+            { gameState |
+                burger = { burger | x = burger.x - 100 },
+                score = gameState.score + 1 }
+    _ -> gameState
+
+
+isCollision : GameState -> Maybe Collision
+isCollision gameState =
+  let marioX = gameState.mario.x
+      marioY = gameState.mario.y
+      burgerX = gameState.burger.x
+      burgerY = gameState.burger.y
+  in
+    if marioX >= burgerX - 20
+        && marioX <= burgerX + 20
+        && marioY <= burgerY + 20 then
+      Just BurgerCollision
+    else
+      Nothing
+
+
 -- VIEW
 
-view : (Int, Int) -> Model -> Element
-view (w',h') mario =
+view : (Int, Int) -> GameState -> Element
+view (w',h') gameState =
   let (w,h) = (toFloat w', toFloat h')
+
+      mario = gameState.mario
+
+      burger = gameState.burger
 
       verb =
         if  mario.y > 0 then
@@ -170,6 +218,10 @@ view (w',h') mario =
               |> toForm
               |> Debug.trace "zombie"
               |> move zombiePosition
+          , gameState.score
+              |> show
+              |> toForm
+              |> move (500, 300)
           ]
 
 
@@ -177,7 +229,7 @@ view (w',h') mario =
 
 main : Signal Element
 main =
-  Signal.map2 view Window.dimensions (Signal.foldp update mario input)
+  Signal.map2 view Window.dimensions (Signal.foldp update gameState input)
 
 
 input : Signal (Float, Keys)
