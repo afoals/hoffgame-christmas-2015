@@ -5,6 +5,7 @@ import Graphics.Element exposing (..)
 import Keyboard
 import Time exposing (..)
 import Window
+import Random
 
 
 -- MODEL
@@ -38,7 +39,6 @@ type alias GameState =
     , burger : Burger
     , zombie : Model
     , score : Int
-    , ball : { x: Float }
     }
 
 type Direction = Left | Right
@@ -90,31 +90,32 @@ gameState =
     , burger = burger
     , zombie = zombie
     , score = 0
-    , ball = { x = 0 }
     }
+
 
 -- UPDATE
 
 update : (Float, Keys) -> GameState -> GameState
 update (dt, keys) gameState =
     let mario =
-      gameState.mario
-          |> gravity dt
-          |> jump keys
-          |> walk keys
-          |> physics dt
-        ball =
-            gameState.ball
+            gameState.mario
+                |> gravity dt
+                |> jump keys
+                |> walk keys
+                |> physics dt
+
+        zombie =
+            gameState.zombie
             |> moveX
     in
-      { gameState | mario = mario, ball = ball}
+      { gameState | mario = mario, zombie = zombie }
           |> handleAnyCollisions
           |> Debug.watch "gameState"
 
 
 moveX ball =
-    let new = if (ball.x >= 400.0) then -400 else ball.x + 3
-    in { x = new }
+    let new = if (ball.x <= -400.0) then 400 else ball.x - 3
+    in { ball | x = new }
 
 jump : Keys -> Model -> Model
 jump keys mario =
@@ -166,9 +167,9 @@ handleAnyCollisions gameState =
         let zombie = gameState.zombie
         in
             { gameState |
-                zombie = { zombie | x = zombie.x - 500 },
+                zombie = { zombie | x = zombie.x + 1000 },
                 score = gameState.score - 1 }
-    _ -> gameState
+    Nothing -> gameState
 
 
 isCollision : GameState -> Maybe Collision
@@ -268,7 +269,6 @@ view (w',h') gameState =
               |> show
               |> toForm
               |> move (500, 300)
-          , circle 20.0 |> filled (rgb 20 70 127) |> move (gameState.ball.x, 0)
           ]
 
 
