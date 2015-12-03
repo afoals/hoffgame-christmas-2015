@@ -81,6 +81,12 @@ gameState =
 
 -- UPDATE
 
+tryUpdate : (Float, Keys, WindowDimensions) -> GameState -> GameState
+tryUpdate (dt, keys, dimensions) gameState =
+  case gameState.status of
+    Dead -> gameState
+    _    -> update (dt, keys, dimensions) gameState
+
 update : (Float, Keys, WindowDimensions) -> GameState -> GameState
 update (dt, keys, dimensions) gameState =
     let mario =
@@ -242,28 +248,29 @@ view (w',h') gameState =
 
       beach2 = gameState.beach2
 
-      verb =
-        if  mario.y > 0 then
-          "jump"
-        else if mario.vx /= 0 then
-          "walk"
-        else
-          "stand"
+      hoffSrc =
+        case gameState.status of
+          Dead  -> "imgs/hoff-explode.png"
+          _     -> let
+                      verb =
+                        if  mario.y > 0 then
+                          "jump"
+                        else if mario.vx /= 0 then
+                          "walk"
+                        else
+                          "stand"
+                      dir =
+                        case mario.dir of
+                          Left -> "left"
+                          Right -> "right"
+                      hoff =
+                        case verb of
+                          "jump" -> "hoff-jump"
+                          "walk" -> "hoff-walk"
+                          _      -> "hoff"
+                   in "imgs/" ++ hoff ++ "-" ++ dir ++ ".gif"
 
-      dir =
-        case mario.dir of
-          Left -> "left"
-          Right -> "right"
-
-      hoff =
-        case verb of
-          "jump" -> "hoff-jump"
-          "walk" -> "hoff-walk"
-          _      -> "hoff"
-
-      src = "imgs/" ++ hoff ++ "-" ++ dir ++ ".gif"
-
-      marioImage = image 150 150 src
+      marioImage = image 150 150 hoffSrc
 
       groundY = 62 - h/2
 
@@ -337,7 +344,7 @@ view (w',h') gameState =
 
 main : Signal Element
 main =
-  Signal.map2 view Window.dimensions (Signal.foldp update gameState input)
+  Signal.map2 view Window.dimensions (Signal.foldp tryUpdate gameState input)
 
 
 input : Signal (Float, Keys, WindowDimensions)
