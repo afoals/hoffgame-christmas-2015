@@ -108,8 +108,8 @@ update (dt, keys, dimensions) gameState =
 
 
 moveX keys zombie =
-    let vx = toFloat keys.x * 10
-        new = if (zombie.x <= -400.0) then 400 else zombie.x - vx - 5
+    let vx = toFloat keys.x * 6
+        new = if (zombie.x <= -400.0) then 400 else zombie.x - vx - 10
     in { zombie | x = new }
 
 jump : Keys -> Model -> Model
@@ -148,8 +148,10 @@ walk keys mario =
 
 beachPhysics : Float -> WindowDimensions -> Beach -> Beach
 beachPhysics dt dimensions beach =
-    { beach |
-        x = beach.x - dt * beach.vx
+    let w = toFloat dimensions.width
+        newX = beach.x - dt * beach.vx
+    in { beach |
+        x = if (newX <= 1 - w) then 0 else newX
     }
 
 
