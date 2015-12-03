@@ -35,7 +35,7 @@ type alias GameState =
     , score : Int
     , beach : Beach
     , beach2 : Beach
-
+    , status : Status
     }
 
 type Direction = Left | Right
