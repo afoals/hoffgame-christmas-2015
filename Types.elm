@@ -35,7 +35,7 @@ type Status = Dead | Alive Int | Hurt Hurting
 
 type alias GameState =
     { mario : Model
-    , burger : Burger
+    , burgers : List Burger
     , zombie : Model
     , zombie2 : Model
     , score : Int

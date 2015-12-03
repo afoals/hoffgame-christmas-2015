@@ -6,7 +6,7 @@ import Text exposing (..)
 import Keyboard
 import Time exposing (..)
 import Window
-import Random
+import Random exposing (..)
 import Zombie
 import Types exposing (..)
 import Lives
@@ -17,7 +17,7 @@ import Lives
 
 type alias Keys = { x:Int, y:Int }
 
-type Collision = BurgerCollision | ZombieCollision
+type Collision = BurgerCollision (List Burger) | ZombieCollision
 
 type alias WindowDimensions = { height: Int, width: Int }
 
@@ -31,11 +31,14 @@ mario =
     , dir = Right
     }
 
-burger : Burger
-burger =
-    { x = 200
-    , y = 0
-    }
+
+burgers =
+  [ { x = 200, y = 0 },
+    { x = 700, y = 0 },
+    { x = 950, y = 10 },
+    { x = 1100, y = 0 },
+    { x = 1500, y = 0 },
+    { x = 1800, y = 0 } ]
 
 sky : Sky
 sky =
@@ -89,7 +92,7 @@ zombie2 =
 gameState : GameState
 gameState =
     { mario = mario
-    , burger = burger
+    , burgers = burgers
     , zombie = zombie
     , zombie2 = zombie2
     , score = 0
@@ -117,9 +120,9 @@ update (dt, keys, dimensions) gameState =
             |> walk keys
             |> physics dt dimensions
 
-        burger =
-            gameState.burger
-            |> moveBurger keys dt
+        burgers =
+            gameState.burgers
+            |> List.map (moveBurger keys dt)
         zombie =
             gameState.zombie
             |> moveX keys dimensions
@@ -142,7 +145,7 @@ update (dt, keys, dimensions) gameState =
             Lives.update gameState.status
 
     in
-      { gameState | mario = mario, zombie = zombie, beach = beach, beach2 = beach2, beach3 = beach3, status = newStatus, burger = burger, zombie2 = zombie2 }
+      { gameState | mario = mario, zombie = zombie, beach = beach, beach2 = beach2, beach3 = beach3, status = newStatus, burgers = burgers, zombie2 = zombie2 }
           |> handleAnyCollisions
           |> Debug.watch "gameState"
 
@@ -227,12 +230,13 @@ scrollBg keys beach =
 handleAnyCollisions : GameState -> GameState
 handleAnyCollisions gameState =
   case isCollision gameState of
-    Just BurgerCollision ->
-        let burger = gameState.burger
-            zombie = gameState.zombie
+    Just (BurgerCollision burgers) ->
+        let newBurgers =
+              gameState.burgers
+              |> List.filter (\b -> List.member b burgers |> not)
         in
             { gameState |
-                burger = { burger | x = burger.x - 100 },
+                burgers = newBurgers,
                 score = gameState.score + 1 }
     Just ZombieCollision ->
         let zombie = gameState.zombie
@@ -251,19 +255,21 @@ isCollision gameState =
     Alive _ ->
       let marioX = gameState.mario.x
           marioY = gameState.mario.y
-          burgerX = gameState.burger.x
-          burgerY = gameState.burger.y
           zombieX = gameState.zombie.x
           zombieY = gameState.zombie.y
-          collide x1 y1 x2 y2 =
-            x1 >= x2 - 20
-              && x1 <= x2 + 20
-              && y1 <= y2 + 20
+          collideWithHoff x2 y2 =
+            marioX >= x2 - 20
+              && marioX <= x2 + 20
+              && marioY <= y2 + 20
+              && marioY >= y2 - 20
+          burgers =
+            gameState.burgers
+            |> List.filter (\b -> collideWithHoff b.x b.y)
       in
-          if collide marioX marioY burgerX burgerY then
-            Just BurgerCollision
-          else if collide marioX marioY zombieX zombieY then
+          if collideWithHoff zombieX zombieY then
             Just ZombieCollision
+          else if List.length burgers > 0 then
+            Just (BurgerCollision burgers)
           else
             Nothing
 
@@ -293,7 +299,7 @@ view (w',h') gameState =
 
       mario = gameState.mario
 
-      burger = gameState.burger
+      burgers = gameState.burgers
 
       zombie = gameState.zombie
 
@@ -334,7 +340,14 @@ view (w',h') gameState =
       position = (mario.x, mario.y + groundY + 50)
 
       burgerImage = image 25 25 "imgs/burger.png"
-      burgerPosition = (burger.x, burger.y + groundY)
+      burgerPosition burger = (burger.x, burger.y + groundY)
+      mapBurger burger =
+        burgerImage
+        |> toForm
+        |> move (burgerPosition burger)
+      burgerImages =
+        burgers
+        |> List.map mapBurger
 
       skyImage w h =
         image w h "imgs/background/sky.png"
@@ -364,56 +377,55 @@ view (w',h') gameState =
           Hurt h  -> h.livesLeft
           Dead    -> 0
       livesImage = image 35 35 "imgs/hoff-right.gif"
+      images =
+        [ skyImage (round w) (round h)
+            |> toForm
+            |> move skyPosition
+        , beachImage (round w) (round h)
+            |> toForm
+            |> move beachPosition
+        , beach2Image (round w) (round h)
+            |> toForm
+            |> move beach2Position
+        , beach3Image (round w) (round h)
+            |> toForm
+            |> move beach3Position
+        , marioImage
+            |> fadeIfHurt gameState.status
+            |> toForm
+            |> Debug.trace "mario"
+            |> move position
+        , zombieImage
+            |> toForm
+            |> Debug.trace "zombie"
+            |> move zombiePosition
+        , zombie2Image
+            |> toForm
+            |> Debug.trace "zombie2"
+            |> move zombie2Position
+        , livesImage
+            |> toForm
+            |> move (474, 300)
+        , lives
+            |> toString  
+            |> fromString
+            |> fontStyle (rgb 0 127 255)
+            |> text
+            |> move (510, 300)
+        , burgerImage
+            |> toForm
+            |> move (470, 260)
+        , gameState.score
+            |> toString  
+            |> fromString
+            |> fontStyle (rgb 219 219 59)
+            |> text
+            |> move (510, 260)
+        ]
   in
-      collage w' h'
-          [ skyImage (round w) (round h)
-              |> toForm
-              |> move skyPosition
-          , beachImage (round w) (round h)
-              |> toForm
-              |> move beachPosition
-          , beach2Image (round w) (round h)
-              |> toForm
-              |> move beach2Position
-          , beach3Image (round w) (round h)
-              |> toForm
-              |> move beach3Position
-          , marioImage
-              |> fadeIfHurt gameState.status
-              |> toForm
-              |> Debug.trace "mario"
-              |> move position
-          , burgerImage
-              |> toForm
-              |> Debug.trace "burger"
-              |> move burgerPosition
-          , zombieImage
-              |> toForm
-              |> Debug.trace "zombie"
-              |> move zombiePosition
-          , zombie2Image
-              |> toForm
-              |> Debug.trace "zombie2"
-              |> move zombie2Position
-          , livesImage
-              |> toForm
-              |> move (474, 300)
-          , lives
-              |> toString  
-              |> fromString
-              |> fontStyle (rgb 0 127 255)
-              |> text
-              |> move (510, 300)
-          , burgerImage
-              |> toForm
-              |> move (470, 260)
-          , gameState.score
-              |> toString  
-              |> fromString
-              |> fontStyle (rgb 219 219 59)
-              |> text
-              |> move (510, 260)
-          ]
+      burgerImages
+      |> List.append images
+      |> collage w' h'
 
 
 -- SIGNALS
