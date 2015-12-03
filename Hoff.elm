@@ -8,6 +8,7 @@ import Window
 import Random
 import Zombie
 import Types exposing (..)
+import Lives
 
 
 -- MODEL
@@ -100,9 +101,12 @@ update (dt, keys, dimensions) gameState =
             gameState.beach2
             |> scrollBg keys
             |> beachPhysics dt dimensions
+        newStatus =
+            Lives.update gameState.status
+
     in
 
-      { gameState | mario = mario, zombie = zombie, beach = beach, beach2 = beach2 }
+      { gameState | mario = mario, zombie = zombie, beach = beach, beach2 = beach2, status = newStatus}
           |> handleAnyCollisions
           |> Debug.watch "gameState"
 
